@@ -22,10 +22,22 @@ func TestScopeEvalContext(t *testing.T) {
 		},
 		ResourceInstances: map[string]cty.Value{
 			"null_resource.foo": cty.ObjectVal(map[string]cty.Value{
-				"attr": cty.StringVal("bar"),
+				"attr":  cty.StringVal("bar"),
+				"attr2": cty.StringVal("bar2"),
 			}),
 			"data.null_data_source.foo": cty.ObjectVal(map[string]cty.Value{
 				"attr": cty.StringVal("bar"),
+			}),
+			"data.null_data_source.multi": cty.TupleVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"attr": cty.StringVal("multids0"),
+				}),
+				cty.ObjectVal(map[string]cty.Value{
+					"attr": cty.StringVal("multids1"),
+				}),
+			}),
+			"data.null_data_source.multi[0]": cty.ObjectVal(map[string]cty.Value{
+				"attr": cty.StringVal("multids0"),
 			}),
 			"null_resource.multi": cty.TupleVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
@@ -88,7 +100,8 @@ func TestScopeEvalContext(t *testing.T) {
 			map[string]cty.Value{
 				"null_resource": cty.ObjectVal(map[string]cty.Value{
 					"foo": cty.ObjectVal(map[string]cty.Value{
-						"attr": cty.StringVal("bar"),
+						"attr":  cty.StringVal("bar"),
+						"attr2": cty.StringVal("bar2"),
 					}),
 				}),
 			},
@@ -98,7 +111,8 @@ func TestScopeEvalContext(t *testing.T) {
 			map[string]cty.Value{
 				"null_resource": cty.ObjectVal(map[string]cty.Value{
 					"foo": cty.ObjectVal(map[string]cty.Value{
-						"attr": cty.StringVal("bar"),
+						"attr":  cty.StringVal("bar"),
+						"attr2": cty.StringVal("bar2"),
 					}),
 				}),
 			},
@@ -219,6 +233,54 @@ func TestScopeEvalContext(t *testing.T) {
 			map[string]cty.Value{
 				"var": cty.ObjectVal(map[string]cty.Value{
 					"baz": cty.StringVal("boop"),
+				}),
+			},
+		},
+		{
+			`sort(data.null_data_source.multi)`,
+			map[string]cty.Value{
+				"data": cty.ObjectVal(map[string]cty.Value{
+					"null_data_source": cty.ObjectVal(map[string]cty.Value{
+						"multi": cty.TupleVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"attr": cty.StringVal("multids0"),
+							}),
+							cty.ObjectVal(map[string]cty.Value{
+								"attr": cty.StringVal("multids1"),
+							}),
+						}),
+					}),
+				}),
+			},
+		},
+		{
+			`data.null_data_source.multi[0]`,
+			map[string]cty.Value{
+				"data": cty.ObjectVal(map[string]cty.Value{
+					"null_data_source": cty.ObjectVal(map[string]cty.Value{
+						"multi": cty.TupleVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"attr": cty.StringVal("multids0"),
+							}),
+						}),
+					}),
+				}),
+			},
+		},
+		{
+			`sort(data.null_data_source.multi)[0]`,
+			map[string]cty.Value{
+				"data": cty.ObjectVal(map[string]cty.Value{
+					"null_data_source": cty.ObjectVal(map[string]cty.Value{
+						"multi": cty.TupleVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"attr": cty.StringVal("multids0"),
+							}),
+							cty.ObjectVal(map[string]cty.Value{
+								"attr": cty.StringVal("multids1"),
+							}),
+						}),
+					}),
 				}),
 			},
 		},
