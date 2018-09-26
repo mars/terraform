@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/google/go-cmp/cmp"
 	"github.com/go-test/deep"
+	"github.com/google/go-cmp/cmp"
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/hashicorp/terraform/addrs"
@@ -1492,7 +1492,7 @@ func TestContext2Apply_dataBasic(t *testing.T) {
 	p.DiffFn = testDiffFn
 	p.ReadDataSourceResponse = providers.ReadDataSourceResponse{
 		State: cty.ObjectVal(map[string]cty.Value{
-			"id": cty.StringVal("yo"),
+			"id":  cty.StringVal("yo"),
 			"foo": cty.NullVal(cty.String),
 		}),
 	}
