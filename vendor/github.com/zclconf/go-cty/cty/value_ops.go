@@ -10,6 +10,10 @@ import (
 )
 
 func (val Value) GoString() string {
+	if val.IsNull() {
+		return fmt.Sprintf("cty.NullVal(%#v)", val.ty)
+	}
+
 	if val == NilVal {
 		return "cty.NilVal"
 	}
@@ -20,9 +24,6 @@ func (val Value) GoString() string {
 
 	if !val.IsKnown() {
 		return fmt.Sprintf("cty.UnknownVal(%#v)", val.ty)
-	}
-	if val.IsNull() {
-		return fmt.Sprintf("cty.NullVal(%#v)", val.ty)
 	}
 
 	// By the time we reach here we've dealt with all of the exceptions around

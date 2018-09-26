@@ -143,7 +143,7 @@ func (f Function) ReturnTypeForValues(args []cty.Value) (ty cty.Type, err error)
 		val := posArgs[i]
 
 		if val.IsNull() && !spec.AllowNull {
-			return cty.Type{}, NewArgErrorf(i, "must not be null")
+			return cty.Type{}, NewArgErrorf(i, fmt.Sprintf("argument must not be null (is: %#v; all args: %#v)", val, posArgs))
 		}
 
 		// AllowUnknown is ignored for type-checking, since we expect to be

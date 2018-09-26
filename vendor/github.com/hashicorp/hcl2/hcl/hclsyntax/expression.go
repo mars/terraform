@@ -2,9 +2,12 @@ package hclsyntax
 
 import (
 	"fmt"
+	"log"
+	"runtime/debug"
 	"sync"
 
 	"github.com/hashicorp/hcl2/hcl"
+	"github.com/kr/pretty"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 	"github.com/zclconf/go-cty/cty/function"
@@ -105,6 +108,7 @@ func (e *ScopeTraversalExpr) walkChildNodes(w internalWalkFunc) {
 }
 
 func (e *ScopeTraversalExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnostics) {
+	log.Printf("[DEBUG] ScopeTraversalExpr Value ctx: %s", pretty.Sprint(ctx))
 	val, diags := e.Traversal.TraverseAbs(ctx)
 	setDiagEvalContext(diags, e, ctx)
 	return val, diags
@@ -132,7 +136,7 @@ type RelativeTraversalExpr struct {
 }
 
 func (e *RelativeTraversalExpr) walkChildNodes(w internalWalkFunc) {
-	// Scope traversals have no child nodes
+	w(e.Source)
 }
 
 func (e *RelativeTraversalExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnostics) {
@@ -187,6 +191,8 @@ func (e *FunctionCallExpr) walkChildNodes(w internalWalkFunc) {
 }
 
 func (e *FunctionCallExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnostics) {
+	log.Printf("[DEBUG] FunctionCallExpr Value ctx: %s", pretty.Sprint(ctx))
+	debug.PrintStack()
 	var diags hcl.Diagnostics
 
 	var f function.Function
@@ -350,10 +356,14 @@ func (e *FunctionCallExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnosti
 			param = varParam
 		}
 
+		// log.Printf("[DEBUG] Getting arg value: %s (ctx: %s)",
+		// 	pretty.Sprint(argExpr), pretty.Sprint(ctx))
 		val, argDiags := argExpr.Value(ctx)
 		if len(argDiags) > 0 {
 			diags = append(diags, argDiags...)
 		}
+
+		// log.Printf("[DEBUG] Converting %#v (%#v)", val, param.Type)
 
 		// Try to convert our value to the parameter type
 		val, err := convert.Convert(val, param.Type)
@@ -362,7 +372,7 @@ func (e *FunctionCallExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnosti
 				Severity: hcl.DiagError,
 				Summary:  "Invalid function argument",
 				Detail: fmt.Sprintf(
-					"Invalid value for %q parameter: %s.",
+					"Invalid value for %q parameter (during conversion): %s.",
 					param.Name, err,
 				),
 				Subject:     argExpr.StartRange().Ptr(),
@@ -382,6 +392,7 @@ func (e *FunctionCallExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnosti
 		return cty.DynamicVal, diags
 	}
 
+	// log.Printf("[DEBUG] Calling function with following args: %#v", argVals)
 	resultVal, err := f.Call(argVals)
 	if err != nil {
 		switch terr := err.(type) {
@@ -401,7 +412,7 @@ func (e *FunctionCallExpr) Value(ctx *hcl.EvalContext) (cty.Value, hcl.Diagnosti
 				Severity: hcl.DiagError,
 				Summary:  "Invalid function argument",
 				Detail: fmt.Sprintf(
-					"Invalid value for %q parameter: %s.",
+					"Invalid value for %q parameter (during call): %s.",
 					param.Name, err,
 				),
 				Subject:     argExpr.StartRange().Ptr(),
