@@ -2132,6 +2132,12 @@
 			"revisionTime": "2016-10-04T15:35:44Z"
 		},
 		{
+			"checksumSHA1": "xvqMCXXlR74in/1c09UadpfXz9Y=",
+			"path": "github.com/lib/pq",
+			"revision": "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79",
+			"revisionTime": "2018-08-23T06:29:44Z"
+		},
+		{
 			"checksumSHA1": "7iMOW6SxJFNH0/m1tjjCXVZl+Z8=",
 			"path": "github.com/lusis/go-artifactory/src/artifactory.v401",
 			"revision": "7e4ce345df825841661d1b3ffbb1327083d4a22f"
